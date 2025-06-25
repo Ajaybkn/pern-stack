@@ -26,6 +26,7 @@ export const useProductStore = create((set, get) => ({
       await get().fetchProducts();
       get().resetForm();
       toast.success("Product added successfully");
+      document.getElementById("add_product_modal").close();
     } catch (error) {
       console.log(error, "Error adding product");
       toast.error("Failed to add product");
