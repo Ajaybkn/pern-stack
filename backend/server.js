@@ -16,41 +16,36 @@ app.use(morgan("dev")); // log the requests.
 
 //apply arcjet rate limit to all routes-->>
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   try {
-    const decision = aj.protect(req, {
-      requested: 1, //specifies that each request consumes 1 token
+    const decision = await aj.protect(req, {
+      requested: 1, // specifies that each request consumes 1 token
     });
-    if (decision.isBlocked) {
+
+    if (decision.isDenied()) {
       if (decision.reason.isRateLimit()) {
-        res.status(429).json({
-          error: "Too Many Requests",
-        });
+        res.status(429).json({ error: "Too Many Requests" });
       } else if (decision.reason.isBot()) {
-        res.status(403).json({
-          error: "Bot Access Denied",
-        });
+        res.status(403).json({ error: "Bot access denied" });
       } else {
-        res.status(403).json({
-          error: "Forbidden",
-        });
+        res.status(403).json({ error: "Forbidden" });
       }
       return;
     }
-    //check for spoofed bots
+
+    // check for spoofed bots
     if (
       decision.results.some(
         (result) => result.reason.isBot() && result.reason.isSpoofed()
       )
     ) {
-      res.status(403).json({
-        error: "Spoofed Bot Detected",
-      });
+      res.status(403).json({ error: "Spoofed bot detected" });
       return;
     }
+
     next();
   } catch (error) {
-    console.log(("ArcJet Error:", error));
+    console.log("Arcjet error", error);
     next(error);
   }
 });
