@@ -8,6 +8,7 @@ export const useProductStore = create((set, get) => ({
   products: [],
   loading: false,
   error: null,
+  currentProduct: null,
   //form state-->>
   formData: {
     name: "",
@@ -61,6 +62,40 @@ export const useProductStore = create((set, get) => ({
     } catch (error) {
       console.log(error, "Error deleting product");
       toast.error("Failed to delete product");
+    } finally {
+      set({ loading: false });
+    }
+  },
+  updateProduct: async (id) => {
+    set({ loading: true });
+    try {
+      const { formData } = get();
+      const response = await axios.put(
+        `${BASE_URL}/api/products/${id}`,
+        formData
+      );
+      set({ currentProduct: response.data.data });
+      toast.success("Product updated successfully");
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.log("Error in updateProduct function", error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+  fetchProduct: async (id) => {
+    set({ loading: true });
+    try {
+      const response = await axios.get(`${BASE_URL}/api/products/${id}`);
+      set({
+        currentProduct: response.data.data,
+        error: null,
+        formData: response.data.data, //prefill form with current product data
+      });
+    } catch (error) {
+      console.log(error, "Error fetching product");
+      set({ error: "Failed to fetch product", currentProduct: null });
+      toast.error("Failed to fetch product");
     } finally {
       set({ loading: false });
     }
