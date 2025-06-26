@@ -19,9 +19,9 @@ export const aj = arcjet({
     //rate limit requests to 10 per second per IP
     tokenBucket({
       mode: "LIVE",
-      refillRate: 5,
-      interval: 10,
-      capacity: 10,
+      refillRate: 30,
+      interval: 5,
+      capacity: 20,
     }),
   ],
 });
